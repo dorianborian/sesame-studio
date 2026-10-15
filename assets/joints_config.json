@@ -1,0 +1,251 @@
+{
+  "_comment": "Auto-derived starting pivots from hardware/printing/stl bounding boxes (nearest-point-to-frame-center heuristic). These are estimates, not exact hinge coordinates -- recalibrate in Studio's 3D view (Viewport > Calibrate Joints) against your own hardware/CAD before trusting exact poses. Units match the STL files (mm), rotation is in degrees. Axis is the local rotation axis used for live posing. 'invert' mirrors that joint's live-pose rotation around rest_angle (so e.g. an angle of 180 visually behaves like 0 and vice versa) to correct joints that are physically mounted/wired in the opposite direction -- it does not change the angle values themselves, only how Studio renders them; exported firmware code is unaffected. 'parent' means the limb is mounted on the moving end of another limb (two-segment legs), so its pivot is expressed in the parent's local space. 'offset' (position + rotation) is a static visual-only correction applied to that part's mesh, rotated about the mesh's own center -- it does not move the rotation pivot or affect child joints. Use it to fix parts that render slightly out of place or misrotated due to STL export origin/orientation mismatches. '*_offset' under 'body' does the same for the static frame/cover/bottom parts.",
+  "body": {
+    "frame_stl": "Internal-Frame-v121.stl",
+    "cover_stl": "top-covers/Top-Cover-Enclosed-v117.stl",
+    "bottom_stl": "Bottom-Cover-v121.stl",
+    "frame_offset": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "cover_offset": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "bottom_offset": {
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "joints": {
+    "R1": {
+      "stl": "R1-v117.stl",
+      "pivot": [
+        1.9787822436863642,
+        24.247677080327446,
+        -23.95509104050688
+      ],
+      "axis": "Y",
+      "parent": null,
+      "rest_angle": 90,
+      "invert": false,
+      "offset": {
+        "position": [
+          8.150056650854616,
+          -6.5,
+          -83.98487237237576
+        ],
+        "rotation": [
+          0.0,
+          180.0,
+          0.0
+        ]
+      }
+    },
+    "R2": {
+      "stl": "R2-v117.stl",
+      "pivot": [
+        49.22730491298311,
+        30.059347590154758,
+        -23.74086042060904
+      ],
+      "axis": "Y",
+      "parent": null,
+      "rest_angle": 90,
+      "invert": false,
+      "offset": {
+        "position": [
+          47.90039370173192,
+          -6.5,
+          -0.2575760904898138
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "L1": {
+      "stl": "L1-v117.stl",
+      "pivot": [
+        2.2269635809622894,
+        29.044394785620472,
+        28.345195091073858
+      ],
+      "axis": "Y",
+      "parent": null,
+      "rest_angle": 90,
+      "invert": false,
+      "offset": {
+        "position": [
+          8.266466158416772,
+          -6.5,
+          88.63583651213736
+        ],
+        "rotation": [
+          0.0,
+          180.0,
+          0.0
+        ]
+      }
+    },
+    "L2": {
+      "stl": "L2-v117.stl",
+      "pivot": [
+        48.6215810851478,
+        29.95012216757086,
+        29.013191257111075
+      ],
+      "axis": "Y",
+      "parent": null,
+      "rest_angle": 90,
+      "invert": false,
+      "offset": {
+        "position": [
+          47.0,
+          -6.5,
+          6.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "R3": {
+      "stl": "R3-v117.stl",
+      "pivot": [
+        12.470074553916568,
+        8.711465977932544,
+        -61.00332907420119
+      ],
+      "axis": "X",
+      "parent": "R1",
+      "rest_angle": 90,
+      "invert": true,
+      "offset": {
+        "position": [
+          -15.592412804295119,
+          -5.229138482496925,
+          -154.8260474824923
+        ],
+        "rotation": [
+          0.0,
+          180.0,
+          0.0
+        ]
+      }
+    },
+    "R4": {
+      "stl": "R4-v117.stl",
+      "pivot": [
+        38.74361039891361,
+        8.458189445451277,
+        -60.64314472944668
+      ],
+      "axis": "X",
+      "parent": "R2",
+      "rest_angle": 90,
+      "invert": false,
+      "offset": {
+        "position": [
+          52.12593613275889,
+          -5.503971686345762,
+          0.841192959758746
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "L3": {
+      "stl": "L3-v117.stl",
+      "pivot": [
+        11.13121697800846,
+        8.3706262093927,
+        65.20465151925863
+      ],
+      "axis": "X",
+      "parent": "L1",
+      "rest_angle": 90,
+      "invert": true,
+      "offset": {
+        "position": [
+          -17.0618365740553,
+          -6.5,
+          160.71687999513205
+        ],
+        "rotation": [
+          0.0,
+          180.0,
+          0.0
+        ]
+      }
+    },
+    "L4": {
+      "stl": "L4-v117.stl",
+      "pivot": [
+        39.71157121617922,
+        8.726699185862017,
+        65.60416408060097
+      ],
+      "axis": "X",
+      "parent": "L2",
+      "rest_angle": 90,
+      "invert": false,
+      "offset": {
+        "position": [
+          51.64811466411246,
+          -6.5,
+          5.595026232743978
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  },
+  "face_plane": {
+    "position": [
+      -7.221079130134963,
+      42.52208690198802,
+      2.383228302001953
+    ],
+    "rotation": [
+      0.0,
+      0.0,
+      160.0
+    ],
+    "width_in": 0.96
+  }
+}
