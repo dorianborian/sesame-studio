@@ -12,18 +12,16 @@ import re
 from pathlib import Path
 
 from .project import Face
+from .paths import FIRMWARE_DIR, ASSETS_DIR, BASE_DIR
 from .servo_model import RESERVED_FACE_NAMES, FACE_CATEGORY_CUSTOM
-
-APP_DIR = Path(__file__).resolve().parent
-STUDIO_DIR = APP_DIR.parent
 
 
 def _find_firmware_file(filename: str) -> Path:
     candidates = [
-        STUDIO_DIR / "assets" / "firmware" / filename,
-        STUDIO_DIR / "assets" / filename,
-        STUDIO_DIR.parent / "sesame-robot" / "firmware" / filename,
-        STUDIO_DIR.parent.parent / "firmware" / filename,
+        FIRMWARE_DIR / filename,
+        ASSETS_DIR / filename,
+        BASE_DIR.parent / "sesame-robot" / "firmware" / filename,
+        BASE_DIR.parent.parent / "firmware" / filename,
     ]
     for c in candidates:
         if c.is_file():

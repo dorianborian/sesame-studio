@@ -28,9 +28,7 @@ from .tutorial import (
 from .code_export import export_sequence, export_face_bundle, ValidationError
 from .widgets.toast import show_toast
 
-ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
-LOGO_PATH = os.path.join(ASSETS_DIR, "sesame-sticker2.png")
-ICON_PATH = os.path.join(ASSETS_DIR, "sesame-sticker2.png")
+from .paths import ASSETS_DIR, LOGO_PATH, ICON_PATH, FIRMWARE_DIR, BASE_DIR
 RECENT_KEY = "project/recent"
 MAX_RECENT = 8
 
@@ -416,11 +414,11 @@ class MainWindow(QMainWindow):
     def open_face_bitmaps_dialog(self) -> None:
         if not self._confirm_discard_unsaved():
             return
-        studio_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         candidates = [
-            os.path.join(studio_dir, "assets", "firmware", "face-bitmaps.h"),
-            os.path.join(os.path.dirname(studio_dir), "sesame-robot", "firmware", "face-bitmaps.h"),
-            os.path.join(os.path.dirname(os.path.dirname(studio_dir)), "firmware", "face-bitmaps.h"),
+            str(FIRMWARE_DIR / "face-bitmaps.h"),
+            str(ASSETS_DIR / "face-bitmaps.h"),
+            str(BASE_DIR.parent / "sesame-robot" / "firmware" / "face-bitmaps.h"),
+            str(BASE_DIR.parent.parent / "firmware" / "face-bitmaps.h"),
         ]
         default_path = ""
         for c in candidates:

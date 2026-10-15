@@ -45,16 +45,14 @@ from PySide6.QtWidgets import (
 from .stl_loader import load_stl, Mesh
 from .servo_model import SERVO_ORDER, SERVO_COLORS, SERVO_RANGES, FACE_WIDTH, FACE_HEIGHT
 from .theme import ACCENT
-
-APP_DIR = Path(__file__).resolve().parent
-STUDIO_DIR = APP_DIR.parent
+from .paths import STL_DIR, BASE_DIR, get_joints_config_load_path, get_joints_config_save_path
 
 
 def _find_stl_root() -> Path:
     candidates = [
-        STUDIO_DIR / "assets" / "stl",
-        STUDIO_DIR.parent / "sesame-robot" / "hardware" / "printing" / "stl",
-        STUDIO_DIR.parent.parent / "hardware" / "printing" / "stl",
+        STL_DIR,
+        BASE_DIR.parent / "sesame-robot" / "hardware" / "printing" / "stl",
+        BASE_DIR.parent.parent / "hardware" / "printing" / "stl",
     ]
     for c in candidates:
         if c.is_dir() and any(c.glob("*.stl")):
@@ -63,7 +61,6 @@ def _find_stl_root() -> Path:
 
 
 STL_ROOT = _find_stl_root()
-JOINTS_CONFIG_PATH = STUDIO_DIR / "assets" / "joints_config.json"
 
 AXIS_VECTORS = {"X": (1.0, 0.0, 0.0), "Y": (0.0, 1.0, 0.0), "Z": (0.0, 0.0, 1.0)}
 AXIS_COLORS = {"X": (1.0, 0.2, 0.2), "Y": (0.2, 1.0, 0.2), "Z": (0.3, 0.5, 1.0)}
@@ -164,7 +161,8 @@ class JointRig:
     """Loads assets/joints_config.json and the STL meshes it references."""
 
     def __init__(self):
-        with open(JOINTS_CONFIG_PATH, "r", encoding="utf-8") as fh:
+        config_path = get_joints_config_load_path()
+        with open(config_path, "r", encoding="utf-8") as fh:
             self.config = json.load(fh)
         self._mesh_cache: dict[str, Mesh] = {}
 
@@ -215,7 +213,9 @@ class JointRig:
         return {"frame": self.body_frame, "bottom": self.body_bottom, "cover": self.body_cover}.get(key)
 
     def save(self) -> None:
-        with open(JOINTS_CONFIG_PATH, "w", encoding="utf-8") as fh:
+        save_path = get_joints_config_save_path()
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(save_path, "w", encoding="utf-8") as fh:
             json.dump(self.config, fh, indent=2)
 
 

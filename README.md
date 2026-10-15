@@ -21,7 +21,15 @@ Sesame Studio is the standalone animation, pose sequencing, and OLED face design
 
 ---
 
-## Installation & Requirements
+## Downloads & Releases (Windows)
+
+For Windows users who want to run Sesame Studio without installing Python:
+* **Standalone Portable Executable**: Download `SesameStudio.exe` (or `SesameStudio-v2.0.0-windows-x64.zip`) from the [Releases](https://github.com/dorianborian/sesame-studio/releases) page.
+* No installation, Python setup, or extra dependencies required. Simply double-click `SesameStudio.exe` to run.
+
+---
+
+## Installation (Running from Source)
 
 ### Prerequisites
 - **Python 3.10+**
@@ -48,6 +56,14 @@ Sesame Studio is the standalone animation, pose sequencing, and OLED face design
    pip install -r requirements.txt
    ```
    *(PySide6, PyOpenGL, numpy, Pillow)*
+
+### Building the Portable Windows Executable
+To package your own standalone `.exe` from source:
+```bash
+pip install pyinstaller
+python build_windows_exe.py
+```
+This generates `dist/SesameStudio.exe` and `dist/SesameStudio-v2.0.0-windows-x64.zip`.
 
 ---
 
@@ -78,6 +94,7 @@ sesame-studio/
 ├── app/
 │   ├── main_window.py       # Main application window, docking, menu routing
 │   ├── project.py           # .sesproj data model and JSON serialization
+│   ├── paths.py             # Centralized asset, resource & user-data path resolution
 │   ├── servo_model.py       # Servo definitions, angle constraints, categories
 │   ├── viewport3d.py         # OpenGL 3D posable robot viewport & STL loader
 │   ├── timeline.py          # Keyframe sequence and playback timeline
@@ -92,11 +109,14 @@ sesame-studio/
 │   └── welcome.py           # Project start/open welcome page
 ├── assets/
 │   ├── joints_config.json   # Kinematic joint pivot and axis calibration
+│   ├── sesame-icon.ico      # Multi-resolution Windows executable icon
 │   ├── stl/                 # 3D printable mesh assets for viewport rendering
 │   └── firmware/            # Reference face-bitmaps.h and firmware templates
 ├── tests/
 │   ├── test_face_bitmaps.py      # Unit tests for C header parser & serializer
 │   └── test_face_bitmaps_gui.py  # Qt GUI integration tests
+├── build_windows_exe.py     # Release packaging script
+├── SesameStudio.spec        # PyInstaller specification
 ├── requirements.txt         # Python package dependencies
 ├── sesame_studio.py         # Application entry point
 └── README.md

@@ -11,16 +11,20 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Guard against None stdout/stderr in windowed/frozen environments
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
 
+from app.paths import LOGO_PATH, ICON_ICO_PATH
 from app.theme import STYLESHEET
 from app.viewport3d import apply_desktop_gl_format
 from app.splash import SplashScreen
 from app.main_window import MainWindow
-
-ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
-LOGO_PATH = os.path.join(ASSETS_DIR, "sesame-sticker2.png")
 
 
 def main() -> int:
@@ -35,8 +39,9 @@ def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName("Sesame Studio")
     app.setOrganizationName("SesameRobot")
-    app.setStyleSheet(STYLESHEET)
-    if os.path.exists(LOGO_PATH):
+    if os.path.exists(ICON_ICO_PATH):
+        app.setWindowIcon(QIcon(ICON_ICO_PATH))
+    elif os.path.exists(LOGO_PATH):
         app.setWindowIcon(QIcon(LOGO_PATH))
 
     window = MainWindow()
