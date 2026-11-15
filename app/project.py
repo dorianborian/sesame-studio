@@ -13,6 +13,8 @@ import json
 import time
 from dataclasses import dataclass, field, asdict
 
+import numpy as np
+
 from .servo_model import (
     SERVO_ORDER, DEFAULT_ANGLE, DEFAULT_BOARD_VARIANT,
     FACE_CATEGORY_CUSTOM, FACE_WIDTH, FACE_HEIGHT, FACE_MAX_FRAMES,
@@ -32,31 +34,39 @@ def blank_frame() -> bytearray:
     return bytearray(BYTES_PER_FRAME)
 
 
-def pixels_to_frame(pixels: list[list[bool]]) -> bytearray:
-    """128x64 bool grid (row-major, pixels[y][x]) -> packed 1024-byte frame."""
-    buf = bytearray(BYTES_PER_FRAME)
-    for y in range(FACE_HEIGHT):
-        row = pixels[y]
-        for bx in range(FACE_WIDTH // 8):
-            byte = 0
-            for bit in range(8):
-                x = bx * 8 + bit
-                if row[x]:
-                    byte |= 0x80 >> bit
-            buf[y * (FACE_WIDTH // 8) + bx] = byte
-    return buf
+def frame_to_array(frame) -> "np.ndarray":
+    """Packed 1024-byte frame -> (64, 128) bool array (arr[y, x]).
+
+    Short/long inputs are padded/truncated to exactly one frame so a damaged
+    project can never crash a paint or preview path."""
+    data = bytes(frame)
+    if len(data) != BYTES_PER_FRAME:
+        data = data[:BYTES_PER_FRAME].ljust(BYTES_PER_FRAME, b"\x00")
+    bits = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
+    return bits.reshape(FACE_HEIGHT, FACE_WIDTH).astype(bool)
+
+
+def array_to_frame(arr) -> bytearray:
+    """(64, 128) array of truthy/falsy pixels -> packed 1024-byte frame
+    (horizontal scan, MSB first). Inverse of frame_to_array."""
+    a = np.asarray(arr)
+    if a.shape != (FACE_HEIGHT, FACE_WIDTH):
+        raise ValueError(
+            f"expected a ({FACE_HEIGHT}, {FACE_WIDTH}) pixel array, got {a.shape}"
+        )
+    return bytearray(np.packbits(a.astype(bool), axis=None).tobytes())
+
+
+def pixels_to_frame(pixels) -> bytearray:
+    """128x64 bool grid (row-major, pixels[y][x]) -> packed 1024-byte frame.
+    Accepts a list of lists or a (64, 128) numpy array."""
+    return array_to_frame(np.asarray(pixels, dtype=bool))
 
 
 def frame_to_pixels(frame: bytes) -> list[list[bool]]:
-    pixels = [[False] * FACE_WIDTH for _ in range(FACE_HEIGHT)]
-    stride = FACE_WIDTH // 8
-    for y in range(FACE_HEIGHT):
-        for bx in range(stride):
-            byte = frame[y * stride + bx]
-            for bit in range(8):
-                if byte & (0x80 >> bit):
-                    pixels[y][bx * 8 + bit] = True
-    return pixels
+    """Packed frame -> list-of-lists bool grid. Prefer frame_to_array in new
+    code; this stays for callers that want plain Python lists."""
+    return frame_to_array(frame).tolist()
 
 
 # ---------------------------------------------------------------------------

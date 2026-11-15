@@ -193,57 +193,72 @@ CRAB = _seq("crab", STAND_STATE, [
     (dict(STAND_STATE), 400, "stand", "once"),
 ])
 
-# --- Movement animations: one representative cycle (firmware loops these
-# for as long as the direction button is held; here they loop in the
-# Timeline preview instead). ---
+# --- Movement animations ---------------------------------------------------
+# The remastered "V5" gaits by @Saireous (sesame-robot commit bb87021,
+# firmware/movement-sequences.h: runWalkPose / runWalkBackward / runTurnLeft /
+# runTurnRight). On the robot each one runs for as long as its direction
+# button is held:
+#
+#   set the "walk" face (looping), wait one frameDelay in the stand pose
+#   lift diagonal pair A (R3 + L4), wait
+#   repeat while held:
+#       swing the lifted pair / push with the grounded pair      (4 hips)
+#       soft support exchange: A lands while B (L3 + R4) lifts   (4 knees)
+#       swing / push the other way                               (4 hips)
+#       B lands while A lifts -- straight into the next cycle,
+#       without returning to the rigid stand pose                (4 knees)
+#   stand
+#
+# Only the two hip steps differ between forward, backward and the turns. A
+# held button has no fixed length, so each sequence here carries
+# GAIT_PREVIEW_CYCLES passes of the loop between the lead-in and the closing
+# stand frame -- enough to see the continuous cycle-to-cycle hand-over.
+# Every step waits the firmware's default frameDelay (100 ms).
 
-WALK_FORWARD = _seq("walk_forward", STAND_STATE, [
-    ({"R3": 135, "L3": 45, "R2": 100, "L1": 25}, 100, "walk", "once"),
-    ({"R3": 135, "L3": 0}, 100, None, "once"),
-    ({"L4": 135, "L2": 90, "R4": 0, "R1": 180}, 100, None, "once"),
-    ({"R2": 45, "L1": 90}, 100, None, "once"),
-    ({"R4": 45, "L4": 180}, 100, None, "once"),
-    ({"R3": 180, "L3": 45, "R2": 90, "L1": 0}, 100, None, "once"),
-    ({"L2": 135, "R1": 90}, 100, None, "once"),
-    (dict(STAND_STATE), 400, "stand", "once"),
-])
+GAIT_PREVIEW_CYCLES = 3
+GAIT_LEAD_IN_FRAMES = 2      # stand + lift pair A
+GAIT_FRAMES_PER_CYCLE = 4
+GAIT_FRAME_DELAY_MS = 100
 
-WALK_BACKWARD = _seq("walk_backward", STAND_STATE, [
-    (None, 100, "walk", "once"),
-    ({"R3": 135, "L3": 0}, 100, None, "once"),
-    ({"L4": 135, "L2": 135, "R4": 0, "R1": 90}, 100, None, "once"),
-    ({"R2": 90, "L1": 0}, 100, None, "once"),
-    ({"R4": 45, "L4": 180}, 100, None, "once"),
-    ({"R3": 180, "L3": 45, "R2": 45, "L1": 90}, 100, None, "once"),
-    ({"L2": 90, "R1": 180}, 100, None, "once"),
-    (dict(STAND_STATE), 400, "stand", "once"),
-])
+_GAIT_LIFT_A = {"R3": 143, "L4": 148}
+_GAIT_A_LANDS_B_LIFTS = {"R3": 171, "L4": 176, "L3": 38, "R4": 42}
+_GAIT_B_LANDS_A_LIFTS = {"L3": 10, "R4": 14, "R3": 143, "L4": 148}
 
-TURN_LEFT = _seq("turn_left", STAND_STATE, [
-    (None, 100, "walk", "once"),
-    ({"R3": 135, "L4": 135}, 100, None, "once"),
-    ({"R1": 180, "L2": 180}, 100, None, "once"),
-    ({"R3": 180, "L4": 180}, 100, None, "once"),
-    ({"R1": 135, "L2": 135}, 100, None, "once"),
-    ({"R4": 45, "L3": 45}, 100, None, "once"),
-    ({"R2": 90, "L1": 90}, 100, None, "once"),
-    ({"R4": 0, "L3": 0}, 100, None, "once"),
-    ({"R2": 45, "L1": 45}, 100, None, "once"),
-    (dict(STAND_STATE), 400, "stand", "once"),
-])
 
-TURN_RIGHT = _seq("turn_right", STAND_STATE, [
-    (None, 100, "walk", "once"),
-    ({"R4": 45, "L3": 45}, 100, None, "once"),
-    ({"R2": 0, "L1": 0}, 100, None, "once"),
-    ({"R4": 0, "L3": 0}, 100, None, "once"),
-    ({"R2": 45, "L1": 45}, 100, None, "once"),
-    ({"R3": 135, "L4": 135}, 100, None, "once"),
-    ({"R1": 90, "L2": 90}, 100, None, "once"),
-    ({"R3": 180, "L4": 180}, 100, None, "once"),
-    ({"R1": 135, "L2": 135}, 100, None, "once"),
-    (dict(STAND_STATE), 400, "stand", "once"),
-])
+def _gait(name: str, hips_first: dict, hips_second: dict,
+          cycles: int = GAIT_PREVIEW_CYCLES) -> Sequence:
+    d = GAIT_FRAME_DELAY_MS
+    steps: list[tuple[dict | None, int, str | None, str]] = [
+        (None, d, "walk", "loop"),
+        (dict(_GAIT_LIFT_A), d, None, "loop"),
+    ]
+    for _ in range(cycles):
+        steps += [
+            (dict(hips_first), d, None, "loop"),
+            (dict(_GAIT_A_LANDS_B_LIFTS), d, None, "loop"),
+            (dict(hips_second), d, None, "loop"),
+            (dict(_GAIT_B_LANDS_A_LIFTS), d, None, "loop"),
+        ]
+    steps.append((dict(STAND_STATE), 400, "stand", "once"))
+    return _seq(name, STAND_STATE, steps)
+
+
+# Pair A swings forward while grounded pair B pushes the body forward (front
+# legs take a slightly longer stride than the rear ones), then the reverse.
+_WALK_A_SWINGS = {"R1": 170, "L2": 106, "L1": 78, "R2": 18}
+_WALK_B_SWINGS = {"L1": 10, "R2": 76, "R1": 102, "L2": 164}
+
+WALK_FORWARD = _gait("walk_forward", _WALK_A_SWINGS, _WALK_B_SWINGS)
+# Backward is the same two hip steps in the opposite order.
+WALK_BACKWARD = _gait("walk_backward", {"R1": 102, "L2": 164, "L1": 10, "R2": 76},
+                      {"L1": 78, "R2": 18, "R1": 170, "L2": 106})
+
+# Turning in place: the grounded pair twists the body (right side pushes
+# forward and left side backward for a left turn) while the lifted pair resets.
+TURN_LEFT = _gait("turn_left", {"R1": 166, "L2": 160, "L1": 12, "R2": 18},
+                  {"L1": 78, "R2": 76, "R1": 102, "L2": 106})
+TURN_RIGHT = _gait("turn_right", {"R1": 102, "L2": 106, "L1": 78, "R2": 76},
+                   {"L1": 10, "R2": 18, "R1": 170, "L2": 164})
 
 BUILTIN_ORDER = [
     "rest", "stand", "wave", "dance", "swim", "point", "pushup", "bow",

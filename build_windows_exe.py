@@ -87,7 +87,7 @@ def main():
     print(f"SHA-256:    {exe_sha}")
 
     # 3. Create zip package
-    zip_path = dist_dir / "SesameStudio-v2.0.0-windows-x64.zip"
+    zip_path = dist_dir / "SesameStudio-v3.0.0-windows-x64.zip"
     print(f"\nCreating release archive: {zip_path.name}...")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.write(exe_path, arcname="SesameStudio.exe")

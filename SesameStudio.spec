@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """PyInstaller specification file for building Sesame Studio on Windows.
 Produces a standalone, portable single-file executable (SesameStudio.exe)
-with bundled 3D STL assets, firmware templates, and application icons.
+with the bundled 3D robot model, firmware templates, and application icons.
 """
 
 from PyInstaller.utils.hooks import collect_submodules, collect_data_files
@@ -26,9 +26,22 @@ hidden_imports = [
     "OpenGL.GLU",
 ]
 hidden_imports += collect_submodules("OpenGL")
+# numpy.random's compiled bit generators import the stdlib ``secrets`` module
+# from C, which PyInstaller's static analysis cannot see.
+hidden_imports += ["secrets"]
+# app.widgets resolves its exports lazily through importlib, so name every
+# module of the app package explicitly rather than rely on import tracing.
+hidden_imports += collect_submodules("app")
 
+# Only what the app reads at runtime. assets/stl holds print/source geometry
+# (inputs to tools/build_model.py) and is deliberately not bundled.
 datas = [
-    ("assets", "assets"),
+    ("assets/model", "assets/model"),
+    ("assets/firmware", "assets/firmware"),
+    ("assets/sesame-icon.ico", "assets"),
+    ("assets/sesame-icon.png", "assets"),
+    ("assets/sesame-sticker.png", "assets"),
+    ("assets/sesame-sticker2.png", "assets"),
 ]
 
 a = Analysis(
